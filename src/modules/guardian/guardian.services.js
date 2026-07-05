@@ -8,11 +8,12 @@ export const guardianServices = async () => {
         const guardianResponse = await axios.get('https://content.guardianapis.com/search', {
             params: {
                 'api-key': GUARDIAN_API_KEY,
-                'show-fields': 'headline,body',
+                'show-fields': 'headline,body,thumbnail',
                 'order-by': 'newest',
                 'section': 'world',
                 'tag': 'tone/news',
-                'page-size': 20
+                'page-size': 20,
+                // 'show-elements': 'image'
             }
         });
 
@@ -20,11 +21,11 @@ export const guardianServices = async () => {
         const article = results.find(item => item.type === 'article');
 
         if (article) {
-            const {id, fields: {headline, body}} = article;
-            return {id, headline, content: htmlToText(body)};
+            const {id, fields: {headline, body, thumbnail}} = article;
+            return {id, headline, content: htmlToText(body), thumbnail};
         } else {
-            const {id, fields: {headline, body}} = results[0];
-            return {id, headline, content: htmlToText(body)};
+            const {id, fields: {headline, body, thumbnail}} = results[0];
+            return {id, headline, content: htmlToText(body), thumbnail};
         }
     } catch (e) {
         console.error('[Guardian Services] ' + e);

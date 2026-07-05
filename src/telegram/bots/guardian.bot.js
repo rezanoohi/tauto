@@ -4,6 +4,7 @@ import {GUARDIAN_BOT_TOKEN} from '../../config/env.js';
 import {guardianServices} from "../../modules/guardian/guardian.services.js";
 import {isArticleAlreadyPosted, saveArticleIdModel} from "../../modules/guardian/guardian.model.js";
 import {summarizerServices} from "../../modules/ai/summarizer.services.js";
+import {postNewArticle} from "./postNewArticle.js";
 
 const bot = new Bot(GUARDIAN_BOT_TOKEN);
 
@@ -15,9 +16,8 @@ export const guardianBot = async () => {
 
     const postNews = async () => {
         try {
-            const {id, headline, content} = await guardianServices();
+            const {id, headline, content, thumbnail: photoUrl} = await guardianServices();
 
-            // Check if article already posted
             if (isArticleAlreadyPosted(id)) {
                 console.log('[Guardian Bot] Article already posted, Skipping..');
                 return;
@@ -29,9 +29,8 @@ export const guardianBot = async () => {
                 return;
             }
 
-            await bot.api.sendMessage(-1004290570625, aiSummery['persian_summary'] + faTag, {parse_mode: "Markdown"});
-            await bot.api.sendMessage(-1003928156915, aiSummery['english_summary'] + enTag, {parse_mode: "Markdown"});
-
+            await postNewArticle(bot, -1003928156915, photoUrl, aiSummery.english_summary + enTag);
+            await postNewArticle(bot, -1004290570625, photoUrl, aiSummery.persian_summary + faTag);
             await saveArticleIdModel(id);
         } catch (e) {
             console.error('[Guardian Bot Eroor] ' + e);
